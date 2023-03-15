@@ -1,3 +1,8 @@
+## FORK
+----------
+Added module parameter lock_as_insert, to use the lock key as insert.
+This works nicely with my apple magic keyboard.
+
 ## A patched hid-apple kernel module
 ----------
 __UPDATE August 2020: `swap_fn_leftctrl` is now built-in in Linux 5.8 🎉__

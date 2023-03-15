@@ -63,6 +63,12 @@ MODULE_PARM_DESC(swap_fn_f13_insert, "Swap the Fn and f13 keys, making fn insert
 		"(For people who need insert."
 		"[0] = as-is, Mac layout, 1 = swapped)");
 
+static unsigned int lock_as_insert;
+module_param(lock_as_insert, uint, 0644);
+MODULE_PARM_DESC(lock_as_insert, "Use the lock key as insert"
+		"(For people who need insert."
+		"[0] = as-is, Mac layout, 1 = swapped)");
+
 static unsigned int rightalt_as_rightctrl;
 module_param(rightalt_as_rightctrl, uint, 0644);
 MODULE_PARM_DESC(rightalt_as_rightctrl, "Use the right Alt key as a right Ctrl key. "
@@ -217,6 +223,11 @@ static const struct apple_key_translation ejectcd_as_delete_keys[] = {
 
 static const struct apple_key_translation lock_as_delete_keys[] = {
 	{ KEY_COFFEE,	KEY_DELETE },
+	{ }
+};
+
+static const struct apple_key_translation lock_as_insert_keys[] = {
+	{ KEY_COFFEE,	KEY_INSERT },
 	{ }
 };
 
@@ -383,6 +394,14 @@ static int hidinput_apple_event(struct hid_device *hid, struct input_dev *input,
 		}
 	}
 
+	if (lock_as_insert) {
+		trans = apple_find_translation(lock_as_insert_keys, usage->code);
+		if (trans) {
+			input_event(input, usage->type, trans->to, value);
+			return 1;
+		}
+	}
+
 	if (capslock_as_leftctrl) {
 		trans = apple_find_translation(capslock_as_leftctrl_keys, usage->code);
 		if (trans) {
@@ -472,6 +491,11 @@ static void apple_setup_input(struct input_dev *input)
 
 	if (lock_as_delete) {
 		for (trans = lock_as_delete_keys; trans->from; trans++)
+			set_bit(trans->to, input->keybit);
+	}
+
+	if (lock_as_insert) {
+		for (trans = lock_as_insert_keys; trans->from; trans++)
 			set_bit(trans->to, input->keybit);
 	}
 
